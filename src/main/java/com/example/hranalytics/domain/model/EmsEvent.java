@@ -1,5 +1,6 @@
 package com.example.hranalytics.domain.model;
 
+import com.example.hranalytics.domain.enums.EmsApproveStatusEnum;
 import com.example.hranalytics.domain.enums.EventTypeEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,7 +42,8 @@ public class EmsEvent {
     private String comment;
 
     @Column(name = "approve", columnDefinition = "int default 0")
-    private int approve;
+    @Enumerated(value = EnumType.ORDINAL)
+    private EmsApproveStatusEnum approve;
 
     @JoinColumn(name = "vacation_request_id")
     @ManyToOne

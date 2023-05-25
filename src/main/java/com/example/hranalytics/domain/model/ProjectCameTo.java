@@ -6,6 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,4 +44,7 @@ public class ProjectCameTo {
             inverseJoinColumns = {@JoinColumn(name = "user_technologies_id")},
             uniqueConstraints = @UniqueConstraint(columnNames = {"project_came_tos_id", "user_technologies_id"}))
     private Set<UserTechnology> userTechnologies = new HashSet<>();
+
+    @OneToMany(mappedBy = "projectCameTo", cascade = CascadeType.MERGE)
+    private List<EmsEvent> emsEvents;
 }

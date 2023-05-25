@@ -9,8 +9,10 @@ import java.util.List;
 @NoArgsConstructor
 @Setter
 @Getter
-public class UserProjectAnalyticsDto {
+public class UserAnalyticsDto {
     private String userId;
-    private String technologyName;
+    private String firstName;
+    private String lastName;
+    private List<String> technologies;
     List<EvenTypeInfoDto> evenTypeInfoList;
 }
