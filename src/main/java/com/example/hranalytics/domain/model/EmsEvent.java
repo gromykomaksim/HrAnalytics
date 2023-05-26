@@ -17,17 +17,17 @@ public class EmsEvent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "type")
+    @Column(name = "type", nullable = false)
     @Enumerated(value = EnumType.ORDINAL)
     private EventTypeEnum eventType;
 
-    @Column(name = "from")
+    @Column(name = "from", nullable = false)
     private ZonedDateTime from;
 
-    @Column(name = "minuts")
+    @Column(name = "minuts", nullable = false)
     private int minutes;
 
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     private int deleted;
 
     @Column(name = "deleted_time")
@@ -41,7 +41,7 @@ public class EmsEvent {
     @Lob
     private String comment;
 
-    @Column(name = "approve", columnDefinition = "int default 0")
+    @Column(name = "approve", columnDefinition = "int default 0", nullable = false)
     @Enumerated(value = EnumType.ORDINAL)
     private EmsApproveStatusEnum approve;
 

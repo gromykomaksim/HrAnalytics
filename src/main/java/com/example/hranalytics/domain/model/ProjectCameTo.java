@@ -18,24 +18,27 @@ public class ProjectCameTo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     private int deleted;
 
-    @Column(name = "from")
+    @Column(name = "\"from\"", nullable = false)
     private ZonedDateTime from;
 
-    @Column(name = "to")
+    @Column(name = "\"to\"")
     private ZonedDateTime to;
 
-    @Column(name = "rate", columnDefinition = "int default 0")
+    @Column(name = "rate", columnDefinition = "int default 0", nullable = false)
     private int rate;
 
     @Column(name = "deleted_time")
     private ZonedDateTime deletedTime;
 
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "project_id", columnDefinition = "int default 0", nullable = false)
     @ManyToOne
     private Project project;
+
+    @OneToMany(mappedBy = "projectCameTo", cascade = CascadeType.MERGE)
+    private List<EmsEvent> emsEvents;
 
     @ManyToMany
     @JoinTable(
@@ -44,7 +47,4 @@ public class ProjectCameTo {
             inverseJoinColumns = {@JoinColumn(name = "user_technologies_id")},
             uniqueConstraints = @UniqueConstraint(columnNames = {"project_came_tos_id", "user_technologies_id"}))
     private Set<UserTechnology> userTechnologies = new HashSet<>();
-
-    @OneToMany(mappedBy = "projectCameTo", cascade = CascadeType.MERGE)
-    private List<EmsEvent> emsEvents;
 }

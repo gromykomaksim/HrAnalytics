@@ -19,13 +19,13 @@ public class Holiday {
     @Lob
     private String  name;
 
-    @Column(name = "day")
+    @Column(name = "day", nullable = false)
     private int day;
 
-    @Column(name = "month")
+    @Column(name = "month", nullable = false)
     private int month;
 
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     private int deleted;
 
     @Column(name = "deleted_time")

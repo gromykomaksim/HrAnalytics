@@ -17,23 +17,23 @@ public class UserTechnology {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "level")
+    @Column(name = "level", nullable = false)
     private int level;
 
-    @Column(name = "importance")
+    @Column(name = "importance", nullable = false)
     private int importance;
 
-    @Column(name = "begin_use")
+    @Column(name = "begin_use", nullable = false)
     private ZonedDateTime beginUse;
 
-    @Column(name = "deleted")
+    @Column(name = "deleted", nullable = false)
     private int deleted;
 
     @JoinColumn(name = "user_id")
     @ManyToOne
     private User user;
 
-    @JoinColumn(name = "technology_id")
+    @JoinColumn(name = "technology_id", nullable = false)
     @ManyToOne
     private Technology technology;
 

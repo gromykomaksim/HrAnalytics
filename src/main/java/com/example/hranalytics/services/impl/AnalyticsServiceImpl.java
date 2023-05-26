@@ -11,6 +11,7 @@ import com.example.hranalytics.services.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -23,29 +24,16 @@ import java.util.stream.Collectors;
 public class AnalyticsServiceImpl implements AnalyticsService {
     private final ProjectCameToRepository projectCameToRepository;
     @Override
+    @Transactional(readOnly = true)
     public List<ProjectAnalyticsDto> getProjectAnalytics(Integer projectId, String userId,
                                                          LocalDate from, LocalDate to,
                                                          Integer deleted, Integer approved) {
         var projectCameToList =
                 projectCameToRepository.findAll().stream()
-                        .filter(x -> {
-                            if (projectId == null)
-                                return true;
-
-                            return projectId.equals(x.getProject().getId());
-                        })
-                        .filter(x -> x.getUserTechnologies().stream().anyMatch(y -> {
-                            if (userId == null)
-                                return true;
-
-                            return userId.equals(y.getUser().getId());
-                        }))
-                        .filter(x -> {
-                            if (deleted == null)
-                                return true;
-
-                            return x.getDeleted() == deleted;
-                        }).toList();
+                        .filter(x -> projectId == null || projectId.equals(x.getProject().getId()))
+                        .filter(x -> x.getUserTechnologies().stream()
+                                .anyMatch(y -> userId == null || userId.equals(y.getUser().getId())))
+                        .filter(x -> deleted == null || x.getDeleted() == deleted).toList();
 
         Map<Project, List<UserAnalyticsDto>> projectToUser = new HashMap<>();
 
@@ -57,23 +45,16 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
                     while (!fromDate.isAfter(toDate)) {
                         var workedHours = new AtomicInteger(projectCameTo.getRate());
+                        var fromDateForLambda = fromDate;
 
                         if (fromDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)
                                 || fromDate.getDayOfWeek().equals(DayOfWeek.SUNDAY))
                             workedHours.set(0);
 
-                        var fromDateForLambda = fromDate;
-
                         projectCameTo.getEmsEvents().stream()
-                                .filter(x -> {
-                                    if (approved == null)
-                                        return true;
-
-                                    return x.getApprove().ordinal() == approved;
-                                })
+                                .filter(x -> approved == null || x.getApprove().ordinal() == approved)
                                 .filter(x -> x.getFrom().toLocalDate().equals(fromDateForLambda))
                                 .forEach(emsEvent -> {
-
                                     switch (emsEvent.getEventType()) {
                                         case SICK, SOCIAL_VACATION, PAID_VACATION -> {
                                             workedHours.set(0);
@@ -83,7 +64,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                                                 return;
                                         }
                                     }
-
                                     var eventMinutes = userProjectAnalytics.getEvenTypeInfoList()
                                             .get(emsEvent.getEventType().ordinal()).getMinutes()
                                             + emsEvent.getMinutes();
@@ -91,7 +71,6 @@ public class AnalyticsServiceImpl implements AnalyticsService {
                                     userProjectAnalytics.getEvenTypeInfoList().get(emsEvent.getEventType().ordinal()).setMinutes(eventMinutes);
                                 }
                         );
-
                         var totalWorkedHours = userProjectAnalytics.getEvenTypeInfoList()
                                 .get(EventTypeEnum.WORK.ordinal()).getHours()
                                 + workedHours.get();
@@ -101,14 +80,12 @@ public class AnalyticsServiceImpl implements AnalyticsService {
 
                         fromDate = fromDate.plusDays(1);
                     }
-
                     userProjectAnalytics.getEvenTypeInfoList().forEach(
                             evenTypeInfo -> {
                                 evenTypeInfo.setHours(evenTypeInfo.getHours() + evenTypeInfo.getMinutes() / 60);
                                 evenTypeInfo.setMinutes(evenTypeInfo.getMinutes() % 60);
                             }
                     );
-
                     if (!projectToUser.containsKey(projectCameTo.getProject()))
                         projectToUser.put(projectCameTo.getProject(), new ArrayList<>());
 
@@ -153,6 +130,7 @@ public class AnalyticsServiceImpl implements AnalyticsService {
     private LocalDate initFromDate(ProjectCameTo projectCameTo, LocalDate from) {
         if (from == null || from.isBefore(projectCameTo.getFrom().toLocalDate()))
             return projectCameTo.getFrom().toLocalDate();
+
         return from;
     }
 
